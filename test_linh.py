@@ -2,12 +2,11 @@ import pygame
 import math
 from queue import PriorityQueue
 
-WIDTH = 800
+WIDTH = 600
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
-pygame.display.set_caption("A* Path Finding Algorithm")
+pygame.display.set_caption("A* - Sasuke")
 
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
+
 BLUE = (0, 255, 0)
 YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
@@ -16,6 +15,7 @@ PURPLE = (128, 0, 128)
 ORANGE = (255, 165 ,0)
 GREY = (128, 128, 128)
 TURQUOISE = (64, 224, 208)
+GREEN = (0, 255, 0)
 
 class Spot:
 	def __init__(self, row, col, width, total_rows):
@@ -30,12 +30,6 @@ class Spot:
 
 	def get_pos(self):
 		return self.row, self.col
-
-	def is_closed(self):
-		return self.color == RED
-
-	def is_open(self):
-		return self.color == GREEN
 
 	def is_barrier(self):
 		return self.color == BLACK
@@ -52,17 +46,14 @@ class Spot:
 	def make_start(self):
 		self.color = ORANGE
 
-	def make_closed(self):
-		self.color = RED
-
-	def make_open(self):
-		self.color = GREEN
-
 	def make_barrier(self):
 		self.color = BLACK
 
 	def make_end(self):
 		self.color = TURQUOISE
+  
+	# def  make_open(self):
+	# 	self.color = GREEN
 
 	def make_path(self):
 		self.color = PURPLE
@@ -88,29 +79,21 @@ class Spot:
 		return False
 
 
-def h(p1, p2):
-	x1, y1 = p1
-	x2, y2 = p2
-	return abs(x1 - x2) + abs(y1 - y2)
-
-
 def reconstruct_path(came_from, current, draw):
 	while current in came_from:
 		current = came_from[current]
 		current.make_path()
-		draw()
+	draw()
 
 
-def algorithm(draw, grid, start, end):
+def astar(draw, grid, start, end):
 	count = 0
 	open_set = PriorityQueue()
 	open_set.put((0, count, start))
 	came_from = {}
 	g_score = {spot: float("inf") for row in grid for spot in row}
 	g_score[start] = 0
-	f_score = {spot: float("inf") for row in grid for spot in row}
-	f_score[start] = h(start.get_pos(), end.get_pos())
-
+ 
 	open_set_hash = {start}
 
 	while not open_set.empty():
@@ -132,17 +115,13 @@ def algorithm(draw, grid, start, end):
 			if temp_g_score < g_score[neighbor]:
 				came_from[neighbor] = current
 				g_score[neighbor] = temp_g_score
-				f_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end.get_pos())
 				if neighbor not in open_set_hash:
 					count += 1
-					open_set.put((f_score[neighbor], count, neighbor))
+					open_set.put((g_score[neighbor], count, neighbor))
 					open_set_hash.add(neighbor)
-					neighbor.make_open()
+					# current.make_open()
 
 		draw()
-
-		if current != start:
-			current.make_closed()
 
 	return False
 
@@ -189,7 +168,7 @@ def get_clicked_pos(pos, rows, width):
 
 
 def main(win, width):
-	ROWS = 20
+	ROWS = 10
 	grid = make_grid(ROWS, width)
 
 	start = None
@@ -232,8 +211,8 @@ def main(win, width):
 					for row in grid:
 						for spot in row:
 							spot.update_neighbors(grid)
-
-					algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end)
+					
+					astar(lambda: draw(win, grid, ROWS, width), grid, start, end)
 
 				if event.key == pygame.K_c:
 					start = None

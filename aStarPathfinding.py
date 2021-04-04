@@ -279,23 +279,23 @@ def click_button(pos, width):
 def createMaze(grid):
 	i = 1
 	j = 1
-	dis = random.randint(4,8)
+	dis = random.randint(3,7)
 	for rows in grid:
 		for spot in rows:
 			if i % dis == 0 or j % dis == 0:
-				if random.randint(1,50) % dis != 0:
+				if random.randint(1,50) % dis-1 != 0:
 					spot.make_barrier()
 			j += 1
 		i += 1
 		j = 1
-	start = grid[random.randint(0, i - 2)][random.randint(0, i - 2)]
+	start = grid[random.randint(0, i/2 - 2)][random.randint(0, i - 2)]
 	start.make_start()
-	end = grid[random.randint(0, i - 2)][random.randint(0, i - 2)]
+	end = grid[random.randint(i / 2, i - 2)][random.randint(0, i - 2)]
 	end.make_end()
 	return [start, end, grid]
   
 def main(win, width):
-	ROWS = 40
+	ROWS = 25
 	grid = make_grid(ROWS, width)
 
 	start = None
