@@ -183,6 +183,9 @@ def solveDFS(draw, n, state):
 	inspected = []
 	# printState(n, state)
 	while SF > 0:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
 		neighborState = []
 		for x in range(0,4):
 			numb_state = doubleState(n, state)
@@ -299,9 +302,10 @@ def click_button(pos, width):
 
 def main(win, width):
     global root_state
-    # print("Enter n (n > 2): ")
+    print("Enter n (n > 2): ")
     # print("Initial state: ")
-    n = 2
+    # n = 3
+    n = int(input())
     root_state = make_root(n, width)
     grid = make_grid(n, width)
     # state = init_game(n, grid)
@@ -317,6 +321,7 @@ def main(win, width):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+                pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not started:
                     search()
