@@ -24,144 +24,142 @@ TURQUOISE = (64, 224, 208)
 BLACK = (0,0,0)
 
 class Spot:
-    def __init__(self, row, col, width, total_rows):
-        self.row = row
-        self.col = col
-        self.x = width * row
-        self.y = width * col
-        self.color = WHITE
-        self.neighbors = []
-        self.width = width
-        self.total_rows = total_rows
-        self.distance = {}
-        
-    def get_pos(self):
-        return self.row, self.col
-    
-    def is_closed(self):
-        return self.color == TURQUOISE
-    
-    def is_open(self):
-        return self.color == GREEN
-    
-    def is_barrier(self):
-        return self.color == BLACK
-    
-    def is_start(self):
-        return self.color == ORANGE
-    
-    def is_end(self):
-        return self.color == PURPLE
-    
-    def  reset(self):
-        self.color = WHITE
-        
-    def  make_closed(self):
-        self.color = TURQUOISE
-    
-    def  make_start(self):
-        self.color = ORANGE
-        
-    def  make_open(self):
-        self.color = GREEN
-        
-    def  make_barrier(self):
-        self.color = BLACK
-        
-    def  make_end(self):
-        self.color = RED
-        
-    def  make_path(self):
-        self.color = PURPLE
-        
-    def draw(self, win):
-        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
-        
-    def update_neighbors(self, grid):
-        self.neighbors = []
-        #UP
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
-            current = grid[self.row - 1][self.col]
-            self.neighbors.append(current)
-            self.distance[current] = 1
-        #DOWN
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
-            current = grid[self.row + 1][self.col]
-            self.neighbors.append(current)
-            self.distance[current] = 1
-        #LEFT
-        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
-            current = grid[self.row][self.col - 1]
-            self.neighbors.append(current)
-            self.distance[current] = 1
+	def __init__(self, row, col, width, total_rows):
+		self.row = row
+		self.col = col
+		self.x = width * row
+		self.y = width * col
+		self.color = WHITE
+		self.neighbors = []
+		self.width = width
+		self.total_rows = total_rows
+		self.distance = {}
+
+	def get_pos(self):
+		return self.row, self.col
+	def is_closed(self):
+		return self.color == TURQUOISE
+	def is_open(self):
+		return self.color == GREEN
+	def is_barrier(self):
+		return self.color == BLACK
+	def is_start(self):
+		return self.color == ORANGE
+	def is_end(self):
+		return self.color == RED
+	def is_path(self):
+		return self.color == PURPLE
+	def reset(self):
+		self.color = WHITE
+	def  make_closed(self):
+		self.color = TURQUOISE
+	def  make_start(self):
+		self.color = ORANGE
+	def  make_open(self):
+		self.color = GREEN
+	def  make_barrier(self):
+		self.color = BLACK
+	def make_end(self):
+		self.color = RED
+	def make_path(self):
+		self.color = PURPLE
+	def get_pivot(self):
+		return (self.x + self.width/2, self.y + self.width/2)
+	def draw(self, win):
+		if (self.is_start() or self.is_end()):
+			pygame.draw.rect(win, WHITE, (self.x, self.y, self.width, self.width))
+			pygame.draw.circle(win, self.color, (self.x + self.width / 2, self.y + self.width / 2), self.width / 2)
+		else:
+			pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+	def update_neighbors(self, grid):
+		self.neighbors = []
+		#UP
+		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
+			current = grid[self.row - 1][self.col]
+			self.neighbors.append(current)
+			self.distance[current] = 1
+		#DOWN
+		if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
+			current = grid[self.row + 1][self.col]
+			self.neighbors.append(current)
+			self.distance[current] = 1
+		#LEFT
+		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
+			current = grid[self.row][self.col - 1]
+			self.neighbors.append(current)
+			self.distance[current] = 1
 		#RIGHT
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
-            current = grid[self.row][self.col + 1]
-            self.neighbors.append(current)
-            self.distance[current] = 1
-        ## diagonal line
-        #UP_LEFT
-        if self.col > 0 and self.row > 0 and not grid[self.row - 1][self.col - 1].is_barrier():
-            current = grid[self.row - 1][self.col - 1]
-            self.neighbors.append(current)
-            self.distance[current] = math.sqrt(2)
-        #DOWN_RIGHT
-        if self.col < self.total_rows - 1 and self.row < self.total_rows - 1 and not grid[self.row + 1][self.col + 1].is_barrier():
-            current = grid[self.row + 1][self.col + 1]
-            self.neighbors.append(current)
-            self.distance[current] = math.sqrt(2)
-        #UP_RIGHT
-        if  self.col < self.total_rows - 1 and self.row > 0 and not grid[self.row - 1][self.col + 1].is_barrier():
-            current = grid[self.row - 1][self.col + 1]
-            self.neighbors.append(current)
-            self.distance[current] = math.sqrt(2)
-        #DOWN_LEFT
-        if self.col > 0 and self.row < self.total_rows - 1 and not grid[self.row + 1][self.col - 1].is_barrier():
-            current = grid[self.row + 1][self.col - 1]
-            self.neighbors.append(current)
-            self.distance[current] = math.sqrt(2)
-        
-        
-    
-    def __lt__(self, other):
-        return False
-    
+		if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
+			current = grid[self.row][self.col + 1]
+			self.neighbors.append(current)
+			self.distance[current] = 1
+		## diagonal line
+		#UP_LEFT
+		if self.col > 0 and self.row > 0 and not grid[self.row - 1][self.col - 1].is_barrier():
+			current = grid[self.row - 1][self.col - 1]
+			self.neighbors.append(current)
+			self.distance[current] = math.sqrt(2)
+		#DOWN_RIGHT
+		if self.col < self.total_rows - 1 and self.row < self.total_rows - 1 and not grid[self.row + 1][self.col + 1].is_barrier():
+			current = grid[self.row + 1][self.col + 1]
+			self.neighbors.append(current)
+			self.distance[current] = math.sqrt(2)
+		#UP_RIGHT
+		if  self.col < self.total_rows - 1 and self.row > 0 and not grid[self.row - 1][self.col + 1].is_barrier():
+			current = grid[self.row - 1][self.col + 1]
+			self.neighbors.append(current)
+			self.distance[current] = math.sqrt(2)
+		#DOWN_LEFT
+		if self.col > 0 and self.row < self.total_rows - 1 and not grid[self.row + 1][self.col - 1].is_barrier():
+			current = grid[self.row + 1][self.col - 1]
+			self.neighbors.append(current)
+			self.distance[current] = math.sqrt(2)
+	def __lt__(self, other):
+		return False
+
 def h(p1, p2):
-    x1, y1 = p1
-    x2, y2 = p2
-    return math.sqrt(math.pow(abs(x1 - x2),2) + math.pow(abs(y1 - y2),2)) #tính khoảng cách theo col + row 
+	x1, y1 = p1
+	x2, y2 = p2
+	return math.sqrt(math.pow(abs(x1 - x2),2) + math.pow(abs(y1 - y2),2)) #tính khoảng cách theo col + row 
 
 def reconstruct_path(came_from, current, draw):
 	path = []
 	path.append(current.get_pos())
 	distance = 0
+	pivots = []
 	while current in came_from:
 		pre = current
+		pivots.append(pre.get_pivot())
 		current = came_from[current]
 		distance += current.distance[pre]
 		# print(current.distance[pre])
 		if not current.is_start():
 			current.make_path()
+			# current.reset()
 		path.append(current.get_pos())
+	pivots.append(current.get_pivot())
 	draw()
 	print("Distance: ", distance)
 	print("Path")
 	for i in range(0, len(path)):
 		print(path[len(path) - 1 - i])
+	return pivots
 
 def aStarPathfinding(draw, grid, start, end):
 	count = 0
 	open_set = PriorityQueue() #min_heap
 	open_set.put((0, count, start))
 	came_from = {}
+	path = []
 	# f(x) = g(x) + h(x)
 	# tạo dictionary g --> {[spot, score] * rows * rows}
 	# tạo dictionary f --> {[spot, score] * rows * rows}
+	# f = g + h
 	g_score = {spot: float("inf") for row in grid for spot in row}
 	g_score[start] = 0
 	f_score = {spot: float("inf") for row in grid for spot in row}
 	f_score[start] = h(start.get_pos(), end.get_pos())
-    
+	
 	open_set_hash = {start}
  
 	while not open_set.empty():
@@ -179,9 +177,9 @@ def aStarPathfinding(draw, grid, start, end):
 
 		if current == end: # found node end --> end
 			print("Successful!")
-			reconstruct_path(came_from, end, draw)
+			path = reconstruct_path(came_from, end, draw)
 			current.make_end()
-			return True
+			return path
 		
 		for neighbor in current.neighbors:
 			get_score_neighbor = current.distance[neighbor]
@@ -193,7 +191,7 @@ def aStarPathfinding(draw, grid, start, end):
 				g_score[neighbor] = temp_g_score
 				f_score[neighbor] = temp_g_score + h(neighbor.get_pos(), end.get_pos())
 				if neighbor not in open_set_hash:
-					count += 1
+					# count += 1
 					open_set.put((f_score[neighbor], count, neighbor))
 					open_set_hash.add(neighbor)
 					neighbor.make_open()
@@ -208,18 +206,18 @@ def aStarPathfinding(draw, grid, start, end):
 		
 		# time.sleep(1)
 
-	return False
+	return None
 
 # tạo N x N spot
 def make_grid(rows, width):
-    grid = []
-    gap = width // rows #Floor division, chia lấy phần nguyên 
-    for i in range(rows):
-        grid.append([])
-        for j in range(rows):
-            spot = Spot(i, j, gap, rows)
-            grid[i].append(spot)
-    return grid
+	grid = []
+	gap = width // rows #Floor division, chia lấy phần nguyên 
+	for i in range(rows):
+		grid.append([])
+		for j in range(rows):
+			spot = Spot(i, j, gap, rows)
+			grid[i].append(spot)
+	return grid
 
 # vẽ lưới 
 def draw_grid(win, rows, width):
@@ -228,22 +226,30 @@ def draw_grid(win, rows, width):
 		pygame.draw.line(win, GREY, (0, i * gap), (width, i * gap))
 		for j in range(rows):
 			pygame.draw.line(win, GREY, (j * gap, 0), (j * gap, width))
-            
-def draw(win, grid, rows, width):
+
+def draw_path(win, path):
+	if isinstance(path, list):
+		# pygame.draw.line(win, WHITE, (0,0), (700,700))
+		for i in range(0, len(path) - 1):
+			# print(path[i])
+			pygame.draw.line(win, WHITE, path[i], path[i+1])
+
+def draw(win, grid, path, rows, width):
 	for row in grid:
 		for spot in row:
 			spot.draw(win)
 	draw_grid(win, rows, width)
+	draw_path(win, path)
 	pygame.display.update()
-    
+	
 def get_clicked_pos(pos, rows, width):
-    gap = width // rows
-    y, x = pos 
-    
-    row = y // gap 
-    col = x // gap
-    
-    return row, col
+	gap = width // rows
+	y, x = pos 
+	
+	row = y // gap 
+	col = x // gap
+	
+	return row, col
 
 def draw_button(win, width):
 	smallfont = pygame.font.SysFont('Corbel', 35, bold=True)
@@ -273,7 +279,7 @@ def click_button(pos, width):
 		if y in range(75,75+40):
 			return 2
 		if y in range(135,135+40):
-    			return 3
+				return 3
 	return -1
 
 def createMaze(grid):
@@ -288,14 +294,32 @@ def createMaze(grid):
 			j += 1
 		i += 1
 		j = 1
-	start = grid[random.randint(0, i/2 - 2)][random.randint(0, i - 2)]
+	start = grid[random.randint(0, i//2 - 2)][random.randint(0, i - 2)]
 	start.make_start()
-	end = grid[random.randint(i / 2, i - 2)][random.randint(0, i - 2)]
+	end = grid[random.randint(i // 2, i - 2)][random.randint(0, i - 2)]
 	end.make_end()
 	return [start, end, grid]
-  
+def search(win, ROWS, width, grid, start, end):
+	path = None
+	if start == None or end == None:
+		return
+	for row in grid:
+		for spot in row:
+			spot.update_neighbors(grid)
+	path = aStarPathfinding(lambda: draw(win, grid, path, ROWS, width), grid, start, end)
+	return path
+
+def reset(ROWS, width):
+	print("reset!")
+	start = None
+	end = None
+	path = None
+	grid = make_grid(ROWS, width)
+	return [start, end, grid, path]
+
 def main(win, width):
-	ROWS = 25
+	ROWS = 20
+	path = None
 	grid = make_grid(ROWS, width)
 
 	start = None
@@ -304,59 +328,50 @@ def main(win, width):
 	run = True
 	started = False
 	draw_button(win, width)
+ 
 	while run:
-		draw(win, grid, ROWS, width) # vẽ lại spot liên tục 
+		draw(win, grid, path, ROWS, width) # vẽ lại spot liên tục 
 		# return 0
-		for event in pygame.event.get():
-			def search(start, end):
-				if start == None or end == None:
-					return
-				for row in grid:
-					for spot in row:
-						spot.update_neighbors(grid)
-				aStarPathfinding(lambda: draw(win, grid, ROWS, width), grid, start, end)
-			def reset():
-				print("reset!")
-				start = None
-				end = None
-				grid = make_grid(ROWS, width)
-				return [start, end, grid]
-    
+		for event in pygame.event.get():    
 			if event.type == pygame.QUIT:
 				run = False
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_SPACE and not started:
-					search(start, end)
+					path = search(win, ROWS, width, grid, start, end)
 				if event.key == pygame.K_q:
-					reset_grid = reset()
+					reset_grid = reset(ROWS, width)
 					start = reset_grid[0]
 					end = reset_grid[1]
 					grid = reset_grid[2]
+					path = reset_grid[3]
 				if event.key == pygame.K_i:
-					reset_grid = reset()
+					reset_grid = reset(ROWS, width)
 					grid = reset_grid[2]
 					init_grid = createMaze(grid)
 					start = init_grid[0]
 					end = init_grid[1]
 					grid = init_grid[2]
+					path = reset_grid[3]
 					
 			if pygame.mouse.get_pressed()[0]: # LEFT
 				pos = pygame.mouse.get_pos()
 				row, col = get_clicked_pos(pos, ROWS, width)
 				if click_button(pos, width) == 1:
-					search(start, end)
+					path = search(win, ROWS, width, grid, start, end)
 				if click_button(pos, width) == 2:
-					reset_grid = reset()
+					reset_grid = reset(ROWS, width)
 					start = reset_grid[0]
 					end = reset_grid[1]
 					grid = reset_grid[2]
+					path = reset_grid[3]
 				if click_button(pos, width) == 3:
-					reset_grid = reset()
+					reset_grid = reset(ROWS, width)
 					grid = reset_grid[2]
 					init_grid = createMaze(grid)
 					start = init_grid[0]
 					end = init_grid[1]
 					grid = init_grid[2]
+					path = reset_grid[3]
 				if row >= ROWS or col >= ROWS+1:
 					continue
 				spot = grid[row][col]

@@ -180,6 +180,7 @@ def printState(n, state):
 def solveDFS(draw, n, state):
 	step = 0
 	SF = checkSTF(n, state)
+	inspected = []
 	# printState(n, state)
 	while SF > 0:
 		neighborState = []
@@ -187,11 +188,15 @@ def solveDFS(draw, n, state):
 			numb_state = doubleState(n, state)
 			nextState = move(x, n, numb_state)
 			print(nextState)
-			if nextState != []:
+			if nextState != [] and not nextState in inspected:
     				neighborState.append(nextState)
 		print("========")
+		if neighborState == []:
+			return False
 		# idx = len(neighborState)-1
 		idx = random.randint(0,len(neighborState)-1)
+		# idx = len(neighborState) - 1
+		inspected.append(neighborState[idx])
 		# print(neighborState[idx])
 		state = writeState(n, neighborState[idx], state)
 		# printState(n, state)
@@ -246,7 +251,7 @@ def make_root(n, width):
 	return grid 
 
 def init_game(n, state):
-	step = 50
+	step = 3
 	while step > 0:
 		neighborState = []
 		for x in range(0,4):
@@ -261,20 +266,52 @@ def init_game(n, state):
     
 	return state
 
+def draw_button(win, width):
+	smallfont = pygame.font.SysFont('Corbel', 35, bold=True)
+ 
+	pygame.draw.line(win, BLACK, (width,0), (width, width))
+	pygame.draw.rect(win, BLACK, (width, 0, 200, width))
+ 
+	search = smallfont.render('Solve' , True , RED)
+	pygame.draw.rect(win, GREEN, (width+20, 15, 160, 40))
+	win.blit(search , (width + 55, 20))
+ 
+	reset = smallfont.render('Reset' , True , RED)
+	pygame.draw.rect(win, GREEN, (width+20, 75, 160, 40))
+	win.blit(reset , (width + 60, 80))
+ 
+	# create = smallfont.render('Create' , True , RED)
+	# pygame.draw.rect(win, GREEN, (width+20, 135, 160, 40))
+	# win.blit(create , (width + 55, 140))
+ 
+	pygame.display.update()
+ 
+def click_button(pos, width):
+	x, y = pos
+	if x in range(width+20, width+160):
+		if y in range(15,15+40):
+			return 1
+		if y in range(75,75+40):
+			return 2
+		if y in range(135,135+40):
+    			return 3
+	return -1
+
 def main(win, width):
     global root_state
-    print("Enter n (n > 2): ")
-    # n = int(input())
-    print("Initial state: ")
-    n = 5
-    # state = [[3,1,2],[6,4,5],[0,7,8]]
-    # print(state)
+    # print("Enter n (n > 2): ")
+    # print("Initial state: ")
+    n = 2
     root_state = make_root(n, width)
     grid = make_grid(n, width)
-    state = init_game(n, grid)
-    # print(n, grid)
+    # state = init_game(n, grid)
+    state = grid
     run = True
     started = False
+    draw_button(win, width)
+    def search():
+        started = True
+        solveDFS(lambda: draw(win, state, n, width), n, state)
     while run:
         draw(win, state, n, width)
         for event in pygame.event.get():
@@ -282,10 +319,15 @@ def main(win, width):
                 run = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not started:
-                    started = True
-                    solveDFS(lambda: draw(win, state, n, width), n, state)
+                    search()
+                    # started = True
+                    # solveDFS(lambda: draw(win, state, n, width), n, state)
             if pygame.mouse.get_pressed()[0]: # LEFT
-            	pos = pygame.mouse.get_pos()
+                pos = pygame.mouse.get_pos()
+                if click_button(pos, width) == 1:
+                    search()
+                if click_button(pos, width) == 2:
+                    state = init_game(n, make_grid(n,width))
             if pygame.mouse.get_pressed()[2]: # RIGHT 
                 pos = pygame.mouse.get_pos()
     pygame.quit()

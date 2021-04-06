@@ -241,7 +241,7 @@ def click_button(pos, width):
 	return -1
 
 def main(win, width):
-	ROWS = 50
+	ROWS = 20
 	grid = make_grid(ROWS, width)
 
 	start = None
