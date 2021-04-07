@@ -1,5 +1,6 @@
 import random
 import pygame
+import SudokuSolver as SSR
 
 WIDTH = 550
 background_color = (251,247,245)
@@ -193,6 +194,18 @@ def draw(win, grid, width):
 	pygame.display.update()
 
 def solve_sudoku(grid):
+	sudo = SSR.Sudoku()
+	sudo.load(grid)
+	generation, solution = sudo.solve()
+	if (solution):
+		if generation == -1:
+			print("Invalid inputs")
+			str_print = "Invalid input, please try to generate new game"
+		elif generation == -2:
+			print("No solution found")
+			str_print = "No solution found, please try again"
+		else:
+			grid = solution.values
 	return grid
 
 def draw_solution(grid_spot, grid):
