@@ -437,7 +437,7 @@ class Sudoku(object):
 					best_fitness = fitness
 					#best_fitness_population_values = self.population.candidates[c].values
 
-			print("Generation:", generation, " Best fitness:", best_fitness)
+			print("Generation:", generation, " Best fitness:", round(best_fitness * 100, 2), "%")
 			#print(best_fitness_population_values)
 
 			# Create the next population.
