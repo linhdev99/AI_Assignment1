@@ -9,6 +9,7 @@ green2_color = (150, 187, 124)
 yellow_color = (250, 213, 134)
 red_color = (198, 71, 86)
 buffer = 5
+count = 0
 
 pygame.init()
 WIN = pygame.display.set_mode((WIDTH + 200, WIDTH))
@@ -27,8 +28,11 @@ class Spot:
 		self.width = width
 		self.number = number
 
-	def set_text(self, value):
-		self.txt = value
+	def set_number(self, value):
+		self.number = value
+
+	def get_number(self):
+		return self.number
 	
 	def set_textcolor(self, color):
 		self.text_color = color
@@ -73,18 +77,30 @@ def print_grid(grid):
 		print(grid[i])
   
 def generate_solution(grid):
+	global count
+	count += 1
+	if count > 900:
+		return False
 	number_list = [1,2,3,4,5,6,7,8,9]
-	for row in range(0, 9):
+	random.shuffle(number_list)
+	for i in range(0, 9):
+		grid[0][i] = number_list[i]
+	for row in range(1, 9):
 		for col in range(0, 9):
 			random.shuffle(number_list)      
+			# print(row, col, number_list)
 			for number in number_list:
 				if valid_location(grid,row,col,number):
 					grid[row][col] = number
 					break
+	# print_grid(grid)
+	# return
 	if check_empty(grid):
 		grid = [[0] * 9 for x in range(0, 9)]
 		return generate_solution(grid)
 	else:
+		# print(count)
+		# print_grid(grid)
 		return grid
 
 def randomIDX(used_idx):
@@ -95,17 +111,26 @@ def randomIDX(used_idx):
 		if not idx in used_idx:
 			return [x,y]
 
+def clone_grid(grid):
+	temp = []
+	for i in range(9):
+		temp.append([])
+		for j in range(9):
+			temp[i].append(grid[i][j])
+	return temp
+
 def initial_grid(grid_solution):
 	step = [38, 45, 52, 57] # easy: 38, normal: 45, difficult: 52, master: 57
 	used_idx = []
 	random.shuffle(step)
+	grid = clone_grid(grid_solution)
 	for i in range(step[0]):
 		idx = randomIDX(used_idx)
 		x = idx[0]
 		y = idx[1]
 		used_idx.append(x*10+y)
-		grid_solution[x][y] = 0
-	return grid_solution
+		grid[x][y] = 0
+	return grid
 
 def make_grid(win, width, grid):
 	grid_spot = []
@@ -138,7 +163,7 @@ def draw_button(win, width):
 	smallfont = pygame.font.SysFont('Corbel', 35, bold=True)
  
 	pygame.draw.line(win, green1_color, (width,0), (width, width))
-	pygame.draw.rect(win, background_color, (width, 0, 200, width))
+	pygame.draw.rect(win, green1_color, (width, 0, 200, width))
  
 	search = smallfont.render('Solve' , True , red_color)
 	pygame.draw.rect(win, green2_color, (width+20, 15, 160, 40))
@@ -167,10 +192,40 @@ def draw(win, grid, width):
 	draw_button(win, width)
 	pygame.display.update()
 
+def solve_sudoku(grid):
+	return grid
+
+def draw_solution(grid_spot, grid):
+	i = 0
+	j = 0
+	for row in grid_spot:
+		j = 0
+		for spot in row:
+			spot.set_number(grid[i][j])
+			j += 1
+		i += 1
+	return grid_spot
+
+def print_gridspot(grid_spot):
+	grid = []
+	i = 0
+	j = 0
+	for row in grid_spot:
+		grid.append([])
+		j = 0
+		for spot in row:
+			grid[i].append(spot.get_number())
+			j += 1
+		i += 1
+	print(grid)    
+
+def create_empty_grid():
+	return [[0] * 9 for x in range(0, 9)]
+
 def main(win, width):
-	grid = [[0] * 9 for x in range(0, 9)]
+	grid = create_empty_grid()
 	grid_original = generate_solution(grid)
-	print_grid(grid_original)	
+	# print_grid(grid_original)	
 	grid_initial = initial_grid(grid_original)
 	grid_spot = make_grid(win, width, grid_initial)
 	
@@ -183,9 +238,15 @@ def main(win, width):
 			if pygame.mouse.get_pressed()[0]: # LEFT
 				pos = pygame.mouse.get_pos()
 				if click_button(pos, width) == 1:
-					pass
+					grid_solved = solve_sudoku(grid_initial)
+					grid_spot = draw_solution(grid_spot, grid_solved)
 				if click_button(pos, width) == 2:
+					global count
+					count = 0
+					grid = create_empty_grid()
 					grid_original = generate_solution(grid)
+					if not grid_original:
+						continue
 					grid_initial = initial_grid(grid_original)
 					grid_spot = make_grid(win, width, grid_initial)
 			if pygame.mouse.get_pressed()[2]: # RIGHT 
